@@ -22,6 +22,7 @@ import { searchStudies,  } from "@/app/trial/actions";
 
 interface Trial {
   id: string;
+  nct_id: string; // Ensure this is included to use as a query parameter
   title: string;
   description: string;
   brief_summary: string;
@@ -30,6 +31,7 @@ interface Trial {
 interface TrialCardInfo {
   title: string;
   description: string;
+  nct_id: string; // Include this in the TrialCardInfo interface
 }
 
 function TrialCard({ trial }: { trial: TrialCardInfo }) {
@@ -38,21 +40,20 @@ function TrialCard({ trial }: { trial: TrialCardInfo }) {
       <CardHeader>
         <CardTitle>{trial.title}</CardTitle>
         <CardDescription>{trial.description}</CardDescription>
-        <Button className='w-1/3' variant="outline">View Trial</Button>
+        <Link href={`/trial?nct_id=${trial.nct_id}`} passHref>
+          <Button className='w-1/3 bg-white' variant="outline">View Trial</Button>
+        </Link>
       </CardHeader>
     </Card>
   );
 }
 
-function mapTrialsToCards(trials: any[]) {
-  let trialsRes = [];
-  for (const trial of trials) {
-    trialsRes.push({
-      title: trial.protocolSection.identificationModule.briefTitle,
-      description: trial.protocolSection.descriptionModule.briefSummary,
-    });
-  }
-  return trialsRes;
+function mapTrialsToCards(trials: any[]): TrialCardInfo[] {
+  return trials.map(trial => ({
+    title: trial.protocolSection.identificationModule.briefTitle,
+    description: trial.protocolSection.descriptionModule.briefSummary,
+    nct_id: trial.protocolSection.identificationModule.nctId, // Map the nct_id here
+  }));
 }
 
 export function Home() {
