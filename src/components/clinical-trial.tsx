@@ -25,6 +25,42 @@ interface ClinicalTrialProps {
   };
 }
 
+export function mapStudyToClinicalTrialProps(study: any): ClinicalTrialProps {
+  return {
+    title: study.protocolSection.identificationModule.officialTitle,
+    description: study.descriptionModule.briefSummary,
+    trialPhase: "Phase not available", // Since 'phases' is 'NA' in the data
+    enrollmentStatus: study.protocolSection.statusModule.overallStatus,
+    duration: `Start: ${study.protocolSection.statusModule.startDateStruct.date} - Estimated End: ${study.protocolSection.statusModule.completionDateStruct.date}`,
+    studyOverview: [study.descriptionModule.detailedDescription],
+    inclusionCriteria: study.eligibilityModule.eligibilityCriteria
+      .split("\n")
+      .filter((c: string) => c.startsWith("*"))
+      .map((c: string) => c.substring(1).trim()),
+    exclusionCriteria: study.eligibilityModule.eligibilityCriteria
+      .split("\n")
+      .filter((c: string) => c.startsWith("*"))
+      .map((c: string) => c.substring(1).trim()),
+    locationsDescription: `The study is conducted at ${study.contactsLocationsModule.locations[0].facility.city}, ${study.contactsLocationsModule.locations[0].facility.state}, ${study.contactsLocationsModule.locations[0].facility.country}.`,
+    principalInvestigator: {
+      name: study.protocolSection.sponsorCollaboratorsModule.responsibleParty
+        .investigatorFullName,
+      institution:
+        study.protocolSection.sponsorCollaboratorsModule.responsibleParty
+          .investigatorAffiliation,
+      address: "Address not available", // Address is not provided in the data
+      email: study.contactsLocationsModule.centralContacts[0].email,
+    },
+    studyCoordinator: {
+      name: study.contactsLocationsModule.overallOfficials[0].name,
+      institution:
+        study.contactsLocationsModule.overallOfficials[0].affiliation,
+      address: "Address not available", // Address is not provided in the data
+      email: "Email not available", // Email is not provided for the study coordinator
+    },
+  };
+}
+
 export function ClinicalTrial({
   title,
   description,
